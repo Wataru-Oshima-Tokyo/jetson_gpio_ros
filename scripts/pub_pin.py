@@ -10,7 +10,7 @@ from std_msgs.msg import Bool
 def pub_pin(input_pin):
     prev_value = None
     rospy.init_node('pub_pin')
-    pin_pub = rospy.Publisher("insert_result", Bool, queue_size=1)
+    pin_pub = rospy.Publisher("input_status", Bool, queue_size=1)
     msg = Bool()
     msg.data = False
     rate = rospy.Rate(10)
