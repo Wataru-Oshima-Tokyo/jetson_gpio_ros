@@ -29,16 +29,21 @@ def pub_pin():
                 now = rospy.Time().now()
                 if value == GPIO.HIGH:
                     value_str = "HIGH"
+                    msg.data = True
                 else:
                     value_str = "LOW"
-                print("Value read from pin {} : {}".format(input_pin,
-                                                         value_str))  
+                    msg.data = False
+                if msg.data != prev_msg:
+                    print("Value read from pin {} : {}".format(input_pin,
+                                                            value_str))  
                 prev_value = value
+                prev_msg = msg.data
             if value == GPIO.HIGH and now+rospy.Duration(3) < rospy.Time().now():
                 GPIO.setup(input_pin, GPIO.OUT)
                 GPIO.output(input_pin, GPIO.LOW)
                 GPIO.setup(input_pin, GPIO.IN)
                 prev_value = None
+                
             pin_pub.publish(msg)
             rate.sleep()
     finally:
