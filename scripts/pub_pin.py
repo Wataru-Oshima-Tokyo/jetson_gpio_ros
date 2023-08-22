@@ -3,6 +3,7 @@
 import rospy
 import roslib.packages
 import time
+import math
 import Jetson.GPIO as GPIO
 from std_msgs.msg import Bool
 
@@ -21,12 +22,14 @@ def pub_pin():
     GPIO.setup(input_pin, GPIO.IN)  # set pin as an input pin
     print("Publishing GPIO states now! Press ctrl + c to exit")
     now = rospy.Time().now()
+    stable_duration = rospy.Duration(3)  # Adjust this duration as needed
+    stable_time = None
+
     try:
         while not rospy.is_shutdown():
             value = GPIO.input(input_pin)
             # print(value)
             if value != prev_value:
-                now = rospy.Time().now()
                 if value == GPIO.HIGH:
                     value_str = "HIGH"
                     msg.data = True
@@ -38,13 +41,14 @@ def pub_pin():
                                                             value_str))  
                 prev_value = value
                 prev_msg = msg.data
-            if value == GPIO.HIGH and now+rospy.Duration(3) < rospy.Time().now():
-                GPIO.setup(input_pin, GPIO.OUT)
-                GPIO.output(input_pin, GPIO.LOW)
-                GPIO.setup(input_pin, GPIO.IN)
-                prev_value = None
-                
-            pin_pub.publish(msg)
+
+
+                time.sleep(2)  # For getting results after voltages become stable, adjust the delay as needed
+                value_after_delay = GPIO.input(input_pin)
+                if value_after_delay == value:
+                    pin_pub.publish(msg)
+
+
             rate.sleep()
     finally:
         GPIO.cleanup()
