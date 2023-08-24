@@ -5,16 +5,23 @@ import roslib.packages
 import time
 import math
 import Jetson.GPIO as GPIO
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Int32
 
 # define pins
 input_pin = 37 # BOARD pin 37, BCM pin 26 (Linux GPIO 12)
+
+def nova_station_status_callback(msg):
+    nova_station_status = msg.data
+    print("nova_station_status:", nova_station_status)
+
+
 
 def pub_pin():
     GPIO.setmode(GPIO.BOARD) # the pin number of the 40 pin GPIO header from Jetson-nano
     prev_value = None
     rospy.init_node('pub_pin')
     pin_pub = rospy.Publisher("GPIO_status", Bool, queue_size=1)
+    jetson_status_sub = rospy.Subscribe("nova_station_status", Int32, nova_station_status_callback)
     msg = Bool()
     msg.data = False
     rate = rospy.Rate(100)
