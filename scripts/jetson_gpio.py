@@ -37,7 +37,6 @@ def nova_station_status_callback(msg):
     """
     GPIO.setmode(GPIO.BOARD) # the pin number of the 40 pin GPIO header from Jetson-nano
     GPIO.setup(output_pin, GPIO.OUT)
-    prev_value = None
     if prev_status != nova_station_status:
         global blink_thread, blink_flag
 
@@ -52,14 +51,20 @@ def nova_station_status_callback(msg):
             GPIO.output(channel, (GPIO.HIGH, GPIO.LOW, GPIO.LOW))
         elif nova_station_status == 1:
             GPIO.output(channel, (GPIO.LOW, GPIO.HIGH, GPIO.LOW))
+            blink_flag = True
+            blink_thread = threading.Thread(target=blink_lights, args=(output_pins[2],))
+            blink_thread.start()
         elif nova_station_status == 2:
             GPIO.output(channel, (GPIO.LOW, GPIO.HIGH, GPIO.LOW))
         elif nova_station_status == 3:
             GPIO.output(channel, (GPIO.LOW, GPIO.LOW, GPIO.HIGH))
+            blink_flag = True
+            blink_thread = threading.Thread(target=blink_lights, args=(output_pins[2],))
+            blink_thread.start()
         elif nova_station_status == 4:
             GPIO.output(channel, (GPIO.LOW, GPIO.LOW, GPIO.HIGH))
         else:
-            ROS_WARN_STREAM("Invalid situation: " << nova_station_status);
+            GPIO.output(output_pins, (GPIO.LOW, GPIO.LOW, GPIO.LOW))
     prev_status = nova_station_status    
 
 def pub_pin():
